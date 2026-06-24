@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// 1. Target Registry
+model Target {
+  id            String   @id @default(uuid())
+  name          String
+  scope         String?  @db.Text
+  baseUrl       String
+  authFlowType  String?
+  aiModelInfo   String?
+  notes         String?  @db.Text
+  status        String   @default("RESEARCHING") // RESEARCHING, TESTING, COMPLETED
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  endpoints     Endpoint[]
+  promptTests   PromptTest[]
+  authFlows     AuthFlowLog[]
+  tools         ToolMetadata[]
+  findings      Finding[]
+  evidences     Evidence[]
+  reports       Report[]
+}
+
+// 2. Endpoint Discovery Dashboard
+model Endpoint {
+  id          String   @id @default(uuid())
+  targetId    String
+  target      Target   @relation(fields: [targetId], references: [id], onDelete: Cascade)
+  path        String
+  method      String   // GET, POST, PUT, DELETE, etc
+  type        String   // API, SITEMAP, ASSET, WEBSOCKET, GRAPHQL
+  status      String   // ACTIVE, HIDDEN, DEPRECATED
+  riskLevel   String?  // LOW, MEDIUM, HIGH, CRITICAL
+  exposed     Boolean  @default(false)
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+}
+
+// 3. Prompt Behavior Lab
+model PromptTest {
+  id                String   @id @default(uuid())
+  targetId          String
+  target            Target   @relation(fields: [targetId], references: [id], onDelete: Cascade)
+  inputPrompt       String   @db.Text
+  systemContext     String?  @db.Text
+  variant           String?
+  score             Int?
+  aiResponse        String   @db.Text
+  behaviorObserved  String?  @db.Text
+  safetyFlags       String?
+  createdAt         DateTime @default(now())
+}
+
+// 4. Authentication Flow Inspector
+model AuthFlowLog {
+  id              String   @id @default(uuid())
+  targetId        String
+  target          Target   @relation(fields: [targetId], references: [id], onDelete: Cascade)
+  tokenStructure  String?  @db.Text
+  sessionDuration Int?
+  stateChanges    String?  @db.Text
+  notes           String?  @db.Text
+  createdAt       DateTime @default(now())
+}
+
+// 5. Tool Capability Mapper
+model ToolMetadata {
+  id              String   @id @default(uuid())
+  targetId        String
+  target          Target   @relation(fields: [targetId], references: [id], onDelete: Cascade)
+  name            String
+  callableFuncs   Json?
+  paramSchema     Json?
+  permissionModel String?
+  createdAt       DateTime @default(now())
+}
+
+// 6. Finding (Bridge: Evidence → Finding → Report)
+model Finding {
+  id           String   @id @default(uuid())
+  targetId     String
+  target       Target   @relation(fields: [targetId], references: [id], onDelete: Cascade)
+  title        String
+  type         String
+  severity     String   // INFO, LOW, MEDIUM, HIGH, CRITICAL
+  impact       String?  @db.Text
+  reproduction String?  @db.Text
+  status       String   @default("OPEN") // OPEN, CONFIRMED, MITIGATED, CLOSED
+  createdAt    DateTime @default(now())
+
+  evidences    Evidence[]
+}
+
+// 7. Evidence Vault
+model Evidence {
+  id          String   @id @default(uuid())
+  targetId    String
+  target      Target   @relation(fields: [targetId], references: [id], onDelete: Cascade)
+  findingId   String?
+  finding     Finding? @relation(fields: [findingId], references: [id])
+  title       String
+  requestLog  String?  @db.Text
+  responseLog String?  @db.Text
+  fileUrl     String?
+  severity    String   // INFO, LOW, MEDIUM, HIGH, CRITICAL
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+}
+
+// 8. Security Report Generator
+model Report {
+  id              String   @id @default(uuid())
+  targetId        String
+  target          Target   @relation(fields: [targetId], references: [id], onDelete: Cascade)
+  title           String
+  findings        String   @db.Text
+  impactAnalysis  String   @db.Text
+  reproduction    String   @db.Text
+  mitigation      String   @db.Text
+  status          String   @default("DRAFT") // DRAFT, REVIEW, SUBMITTED, ACCEPTED
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
