@@ -28,6 +28,9 @@ export default function PromptLabPage() {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [useApiExecutor, setUseApiExecutor] = useState(false);
+  const [executing, setExecuting] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("gpt-4o");
   const [form, setForm] = useState({
     targetId: "",
     inputPrompt: "",
@@ -38,6 +41,33 @@ export default function PromptLabPage() {
     behaviorObserved: "",
     safetyFlags: "",
   });
+
+  const handleExecute = async () => {
+    if (!form.inputPrompt) return;
+    setExecuting(true);
+    try {
+      const res = await fetch("/api/prompt-tests/execute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          inputPrompt: form.inputPrompt,
+          systemContext: form.systemContext,
+          model: selectedModel
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setForm({ ...form, aiResponse: data.aiResponse });
+      } else {
+        alert(data.error || "Failed to execute prompt");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to execute prompt");
+    } finally {
+      setExecuting(false);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -235,6 +265,32 @@ export default function PromptLabPage() {
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--color-text-secondary)" }}>System Context</label>
                 <textarea className="textarea-field font-mono" rows={3} placeholder="System prompt / context..." value={form.systemContext} onChange={(e) => setForm({ ...form, systemContext: e.target.value })} />
               </div>
+              
+              <div className="p-3 rounded-lg border flex flex-col gap-3" style={{ borderColor: "var(--color-border-subtle)", backgroundColor: "rgba(16, 185, 129, 0.03)" }}>
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 text-xs font-medium cursor-pointer" style={{ color: "var(--color-text-primary)" }}>
+                    <input type="checkbox" checked={useApiExecutor} onChange={(e) => setUseApiExecutor(e.target.checked)} className="rounded border-zinc-700 bg-zinc-900" />
+                    Use API Executor
+                  </label>
+                  {useApiExecutor && (
+                    <select className="select-field text-xs py-1 px-2 h-auto min-h-0 w-auto" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)}>
+                      <option value="gpt-4o">GPT-4o</option>
+                      <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                      <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                    </select>
+                  )}
+                </div>
+                {useApiExecutor && (
+                  <button type="button" onClick={handleExecute} disabled={executing || !form.inputPrompt} className="btn-secondary w-full flex justify-center items-center gap-2" style={{ borderColor: "var(--color-accent-emerald)", color: "var(--color-accent-emerald)" }}>
+                    {executing ? (
+                      <><div className="animate-spin rounded-full h-3 w-3 border-2 border-transparent" style={{ borderTopColor: "currentColor" }} /> Executing...</>
+                    ) : (
+                      <>Execute Prompt</>
+                    )}
+                  </button>
+                )}
+              </div>
+
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--color-text-secondary)" }}>AI Response *</label>
                 <textarea required className="textarea-field font-mono" rows={4} placeholder="What the AI responded..." value={form.aiResponse} onChange={(e) => setForm({ ...form, aiResponse: e.target.value })} />
