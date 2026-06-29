@@ -17,7 +17,7 @@ Instead of jumping between disjointed tools and notes, this platform centers all
 The system is divided into Several Core Modules:
 1. **Target Registry**: The CRM for bug bounties. Stores metadata about targets, URLs, auth types, AI models in use, dan scope.
 2. **Endpoint Discovery**: A dashboard to map out public endpoints, sitemaps, robots.txt, JS asset references, and API inventories.
-3. **Prompt Behavior Lab**: Workspace for testing AI robustness against complex inputs (jailbreaks, context overrides, role confusion).
+3. **Prompt Behavior Lab**: Workspace for testing AI robustness against complex inputs (jailbreaks, context overrides, role confusion). Includes an API Executor for direct prompt testing and OpenAI seed integration.
 4. **Auth Flow Inspector**: Logs and analyzes authentication mechanisms (JWT lifecycles, OAuth misconfigurations).
 5. **Tools Mapper**: Tracks JSON-based tool capability calls (Tool Calling) to find RCE/SSRF vectors in AI parameters.
 6. **Findings Management**: Structured vulnerability tracking with severity aggregations. Bridging evidence with reports.

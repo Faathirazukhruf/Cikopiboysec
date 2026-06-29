@@ -12,7 +12,7 @@ The platform is structured into 8 professional workflows:
 
 1. 🎯 **Target Registry**: The CRM for bug bounties. Store metadata about targets, URLs, auth types, AI models, and scope.
 2. 🔍 **Endpoint Discovery**: A dashboard to map out public endpoints, sitemaps, robots.txt, JS asset references, and API inventories.
-3. 🧪 **Prompt Behavior Lab**: Workspace for testing AI robustness against complex inputs (jailbreaks, context overrides, role confusion).
+3. 🧪 **Prompt Behavior Lab**: Workspace for testing AI robustness against complex inputs (jailbreaks, context overrides, role confusion). Includes an API Executor for direct prompt testing and OpenAI seed integration.
 4. 🔐 **Auth Flow Inspector**: Log and analyze authentication mechanisms (JWT lifecycles, OAuth misconfigurations).
 5. 🧩 **Tools Mapper**: Track JSON-based tool capability calls to find RCE/SSRF vectors in AI parameters.
 6. 📈 **Findings Management**: Structured vulnerability tracking with severity aggregations.
