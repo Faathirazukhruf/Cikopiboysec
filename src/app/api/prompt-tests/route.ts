@@ -20,7 +20,23 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const test = await prisma.promptTest.create({ data: body });
+    
+    if (!body.targetId || !body.inputPrompt || !body.aiResponse) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    const test = await prisma.promptTest.create({ 
+      data: {
+        targetId: body.targetId,
+        inputPrompt: body.inputPrompt,
+        systemContext: body.systemContext || null,
+        variant: body.variant || null,
+        score: body.score || null,
+        aiResponse: body.aiResponse,
+        behaviorObserved: body.behaviorObserved || null,
+        safetyFlags: body.safetyFlags || null,
+      } 
+    });
     return NextResponse.json(test, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Failed to create" }, { status: 500 });

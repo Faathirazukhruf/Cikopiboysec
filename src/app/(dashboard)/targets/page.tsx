@@ -49,6 +49,7 @@ export default function TargetsPage() {
   const fetchTargets = async () => {
     try {
       const res = await fetch("/api/targets");
+      if (!res.ok) throw new Error("Failed to fetch targets");
       const data = await res.json();
       setTargets(Array.isArray(data) ? data : []);
     } catch (e) {
@@ -65,11 +66,17 @@ export default function TargetsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await fetch("/api/targets", {
+      const res = await fetch("/api/targets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
+      
+      if (!res.ok) {
+        alert("Failed to create target");
+        return;
+      }
+      
       setShowModal(false);
       setForm({
         name: "",
@@ -83,16 +90,19 @@ export default function TargetsPage() {
       fetchTargets();
     } catch (e) {
       console.error(e);
+      alert("An error occurred while saving.");
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this target and all related data?")) return;
     try {
-      await fetch(`/api/targets/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/targets/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete target");
       fetchTargets();
     } catch (e) {
       console.error(e);
+      alert("Failed to delete target.");
     }
   };
 
@@ -261,6 +271,7 @@ export default function TargetsPage() {
                 </label>
                 <input
                   required
+                  type="url"
                   className="input-field"
                   placeholder="https://example.com"
                   value={form.baseUrl}
